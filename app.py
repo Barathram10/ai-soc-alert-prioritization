@@ -50,6 +50,7 @@ def artifacts_exist() -> List[str]:
 
 def normalize_binary_label(series: pd.Series) -> pd.Series:
     s = series.astype(str).str.strip().str.lower()
+    missing_like = {"", "nan", "none", "null", "na", "n/a"}
     mapping = {
         "benign": 0,
         "normal": 0,
@@ -62,9 +63,13 @@ def normalize_binary_label(series: pd.Series) -> pd.Series:
         "true": 1,
     }
     mapped = s.map(mapping)
-    if mapped.notna().any():
-        return mapped
-    return pd.to_numeric(series, errors="coerce")
+    numeric = pd.to_numeric(series, errors="coerce")
+
+    labels = mapped.copy()
+    labels = labels.fillna(numeric)
+    attack_text = labels.isna() & ~s.isin(missing_like)
+    labels.loc[attack_text] = 1
+    return labels
 
 
 def prepare_features(df: pd.DataFrame, feature_columns: List[str]) -> Tuple[pd.DataFrame, dict]:
@@ -254,14 +259,32 @@ if uploaded_file is not None:
         s3.metric("Critical alerts", int((ranked["priority"] == "Critical").sum()))
         s4.metric("Threshold used", f"{threshold_used:.2f}")
 
-        metrics_meta = metadata.get("metrics_at_optimized_threshold") if isinstance(metadata, dict) else None
-        if isinstance(metrics_meta, dict):
-            st.subheader("Performance Metrics")
-            m1, m2, m3, m4 = st.columns(4)
-            m1.metric("Accuracy", f"{metrics_meta.get('accuracy', 0):.4f}")
-            m2.metric("Precision", f"{metrics_meta.get('precision', 0):.4f}")
-            m3.metric("Recall", f"{metrics_meta.get('recall', 0):.4f}")
-            m4.metric("F1 Score", f"{metrics_meta.get('f1', 0):.4f}")
+        if actual_label_col != "None" and actual_label_col in df.columns:
+            y_true = normalize_binary_label(df[actual_label_col])
+            preds_series = pd.Series(preds, index=df.index)
+            valid_labels = y_true.notna()
+
+            if valid_labels.any():
+                render_metrics(y_true[valid_labels].astype(int), preds_series[valid_labels].astype(int))
+                if not valid_labels.all():
+                    st.caption(
+                        f"Metrics calculated on {int(valid_labels.sum())} rows with usable labels; "
+                        f"{int((~valid_labels).sum())} rows were skipped."
+                    )
+            else:
+                st.warning(
+                    f"No usable binary labels were found in `{actual_label_col}`. "
+                    "Expected values such as 0/1, true/false, benign/attack, or normal/malicious."
+                )
+        else:
+            metrics_meta = metadata.get("metrics_at_optimized_threshold") if isinstance(metadata, dict) else None
+            if isinstance(metrics_meta, dict):
+                st.subheader("Stored Model Performance Metrics")
+                m1, m2, m3, m4 = st.columns(4)
+                m1.metric("Accuracy", f"{metrics_meta.get('accuracy', 0):.4f}")
+                m2.metric("Precision", f"{metrics_meta.get('precision', 0):.4f}")
+                m3.metric("Recall", f"{metrics_meta.get('recall', 0):.4f}")
+                m4.metric("F1 Score", f"{metrics_meta.get('f1', 0):.4f}")
 
         st.subheader("Top 10 Prioritized Alerts")
         preferred_cols = [c for c in ["alert_id", "risk_score", "priority", "predicted_label"] if c in ranked.columns]
