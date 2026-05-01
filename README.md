@@ -110,6 +110,10 @@ streamlit run app.py
 
 The sidebar shows the loaded Random Forest model, CICIDS2017 training dataset, and 78 input features. The main panel shows 225,745 alerts scored in a single batch with live performance metrics at the default 0.50 threshold.
 
+<img width="1477" height="476" alt="Risk-scored alert table showing alert_id, risk_score=1, priority=Critical, predicted_label=1 columns alongside Destination Port, Flow Duration, Total Fwd/Bwd Packets, and packet length features" src="https://github.com/user-attachments/assets/c52c9c47-f34c-4c94-b48a-07a1e1db86fc" />
+
+<img width="1841" height="771" alt="image" src="https://github.com/user-attachments/assets/d86e4409-ddd4-49f3-b7d2-edb3f6b1cfd3" />
+
 <img width="1499" height="773" alt="Full dashboard showing model config sidebar, SOC triage summary (225,745 scored, 128,027 flagged, 127,949 critical), and performance metrics: Accuracy 0.9999, Precision 0.9999, Recall 0.9999, F1 0.9999 at threshold 0.50" src="https://github.com/user-attachments/assets/6136f505-d14b-4b54-8948-88bc7a005dfe" />
 
 ---
@@ -118,7 +122,9 @@ The sidebar shows the loaded Random Forest model, CICIDS2017 training dataset, a
 
 Raising the threshold from 0.50 → 0.70 tightens the alert queue: flagged alerts drop from 128,027 to 127,997 and precision reaches 1.0000, meaning zero false positives at higher confidence. This demonstrates the real-time tuning capability built into the analyst interface.
 
-<img width="1497" height="819" alt="SOC triage summary at threshold 0.70: 127,997 alerts flagged, Accuracy 0.9999, Precision 1.0000, Recall 0.9998, F1 0.9999 — showing threshold tuning effect on precision" src="https://github.com/user-attachments/assets/6d1a65d4-48da-4cd3-8281-ad93002fdd5c" />
+<img width="1829" height="494" alt="image" src="https://github.com/user-attachments/assets/57a75d45-28fd-46bd-b471-589fce2dd249" />
+
+<img width="1769" height="459" alt="image" src="https://github.com/user-attachments/assets/a84826ad-49f5-4b49-904d-120f48d2c80d" />
 
 ---
 
@@ -126,7 +132,7 @@ Raising the threshold from 0.50 → 0.70 tightens the alert queue: flagged alert
 
 Every alert is assigned a `risk_score` (0–1) and a `priority` label (Critical / High / Medium / Low) alongside the original network flow features. The table is sortable so analysts can filter by risk tier.
 
-<img width="1477" height="476" alt="Risk-scored alert table showing alert_id, risk_score=1, priority=Critical, predicted_label=1 columns alongside Destination Port, Flow Duration, Total Fwd/Bwd Packets, and packet length features" src="https://github.com/user-attachments/assets/c52c9c47-f34c-4c94-b48a-07a1e1db86fc" />
+<img width="187" height="503" alt="image" src="https://github.com/user-attachments/assets/5ae0df95-4368-4e65-a2c7-b6403481c52d" />
 
 ---
 
@@ -134,7 +140,8 @@ Every alert is assigned a `risk_score` (0–1) and a `priority` label (Critical 
 
 The dashboard surfaces the 10 highest-risk alerts at the top of the analyst queue, with a one-click CSV export for handoff to incident response or SOAR ticketing.
 
-<img width="1500" height="788" alt="Top 10 Prioritized Alerts table showing risk_score, priority=Critical, predicted_label columns with all network features, and a Download scored alerts button" src="https://github.com/user-attachments/assets/7ea9ba64-a3da-4dfd-9fa3-769def31f989" />
+<img width="1434" height="674" alt="image" src="https://github.com/user-attachments/assets/ba11e1ec-4b63-4968-975d-88bd707ce0b6" />
+
 
 ---
 
